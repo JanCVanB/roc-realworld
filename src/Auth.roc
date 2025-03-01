@@ -64,7 +64,7 @@ parse_user_id = |req, jwt_secret, now| {
 
 auth_header : UserId, JwtSecret, Instant -> (Str, Str)
 auth_header = |user_id, jwt_secret, now| {
-    claims = { sub: user_id .to_str(), std_claims: { expires_at: now + 12.(hours) } }
+    claims = { sub: user_id .to_str(), std_claims: { expires_at: now + 12 .(hours) } }
 	  token_str = Jwt.hs256_with_claims(claims) .signed_str(jwt_secret)
 
     # Auth header format: https://realworld-docs.netlify.app/specifications/backend/endpoints/
@@ -76,7 +76,7 @@ expect {
     now = time.Instant .from_ns_since_utc_epoch(123456789)
     user_id = UserId.from_str(123)
     jwt_secret = JwtSecret.from_str("abcdefg")
-    expired_time = now + 1.(hour)
+    expired_time = now + 1 .(hour)
     headers = [auth_header(user_id, jwt_secret, expired_time)]
     request = Request.new({ method: "GET", path: "/", headers })
 
@@ -88,7 +88,7 @@ expect {
     now = time.Instant .from_ns_since_utc_epoch(123456789)
     user_id = UserId.from_str(123)
     jwt_secret = JwtSecret.from_str("abcdefg")
-    expired_time = now - 1.(hour)
+    expired_time = now - 1 .(hour)
     headers = [auth_header(user_id, jwt_secret, expired_time)]
     request = Request.new({ method: "GET", path: "/", headers })
 

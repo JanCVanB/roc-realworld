@@ -130,7 +130,7 @@ update! = |{ client, prepared }, user_id, slug, update_article| {
     )
 
     match client .query!(cmd) {
-        Ok([row]) -> Article.from_row(row).(Ok)
+        Ok([row]) -> Article.from_row(row) .(Ok)
         Ok([]) -> Err(NotFound)
         Err(db_err) -> Err(InternalErr(db_err .inspect()))
     }
@@ -178,7 +178,7 @@ favorite! = |{ client, prepared }, user_id, slug| {
     cmd = prepared.favorite_article .bind(u64(user_id), slug)
 
     match client .query!(cmd) {
-        Ok([row]) -> Article.from_row(row).(Ok)
+        Ok([row]) -> Article.from_row(row) .(Ok)
         Ok([]) -> Err(NotFound)
         Err(db_err) -> Err(InternalErr(db_err .inspect()))
     }
@@ -197,7 +197,7 @@ unfavorite! = |{ client, prepared }, user_id, slug| {
       # WHERE a.slug = $2
     match client .query!(cmd) {
         Ok([row]) ->
-            Article.fromRow(row).(Ok)
+            Article.fromRow(row) .(Ok)
         Ok([]) ->
             Err(NotFound)
         Err(db_err) ->
