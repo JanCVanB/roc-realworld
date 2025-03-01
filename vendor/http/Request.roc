@@ -15,7 +15,7 @@ new = |{ method, path, headers }| Request.{ method, path, headers }
 
 header : Request, Str -> Result(Str, [NotFound])
 header = |req, _header_name| {
-    for (name, value) in req.headers.iter() {
+    for (name, value) in req.headers .iter() {
         if name == header_name {
             return Ok(value)
         }
@@ -48,7 +48,7 @@ params = |req| {
     .with_default("")
     .split_on("&")
     .map(|param|
-        match param.split_first("=") {
+        match param .split_first("=") {
             Ok({ before, after }) -> (before, after)
             Err(NotFound) -> (param, "")
         }
@@ -63,5 +63,5 @@ params = |req| {
     .map_ok(.get_1())
     .with_default("")
     .split_on("&")
-    .map(|param| param.split_first("=") ?? (param, ""))
+    .map(|param| param .split_first("=") ?? (param, ""))
 }

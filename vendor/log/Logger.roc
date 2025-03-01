@@ -19,13 +19,13 @@ log! = |{ write_raw! }, level, msg| {
 }
 
 debug! : Logger, Str => {}
-debug! = |log, msg| log.log!(LogLevel.Debug, msg)
+debug! = |log, msg| log .log!(LogLevel.Debug, msg)
 
 info! : Logger, Str => {}
-info! = |log, msg| log.log!(LogLevel.Info, msg)
+info! = |log, msg| log .log!(LogLevel.Info, msg)
 
 warn! : Logger, Str => {}
-warn! = |log, msg| log.log!(LogLevel.Warn, msg)
+warn! = |log, msg| log .log!(LogLevel.Warn, msg)
 
 error! : Logger, Str => {}
-error! = |log, msg| log.log!(LogLevel.Error, msg)
+error! = |log, msg| log .log!(LogLevel.Error, msg)

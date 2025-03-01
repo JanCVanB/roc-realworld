@@ -56,7 +56,7 @@ expect |get!, set!| {
     # pop a different function out of a List which runs on the current query. (If the list
     # is empty, fail with an error saying an unexpected query was performed.)
     on_query! = |query| {
-        expect Ok(Insert({ table: "authors", ..user })) == query.decode())
+        expect Ok(Insert({ table: "authors", ..user })) == query .decode())
         Ok(Pg.empty_query_result())
     }
 
@@ -71,7 +71,7 @@ expect |get!, set!| {
         method: "POST",
         path: "/api/users",
         headers: [],
-        body: { user }.encode(Json.utf8),
+        body: { user } .encode(Json.utf8),
     })
 
     expected = {
@@ -84,5 +84,5 @@ expect |get!, set!| {
         }
     }
 
-    router.handle_req!(req).and_then(.body().decode(Json.utf8)) == Ok(expected_json)
+    router .handle_req!(req) .and_then(.body() .decode(Json.utf8)) == Ok(expected_json)
 }

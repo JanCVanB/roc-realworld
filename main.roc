@@ -43,16 +43,16 @@ init! = |_args| {
         database: required_env_var!("DB_NAME")?,
         port:
             port_str = required_env_var!("DB_PORT")?
-            port_str.to_u16() ? |InvalidNumStr| InitFailed("Invalid DB_PORT: ${port_str}")?,
+            port_str .to_u16() ? |InvalidNumStr| InitFailed("Invalid DB_PORT: ${port_str}")?,
         auth:
             when Env.var("DB_PASSWORD") is
                 Ok(password) -> Password password
                 Err(VarNotFound) -> None,
         tcp: # TODO give function(s) to do the TCP stuff it needs to do.
-        on_err!: |err| log.error!("db error: ${err.inspect()}"),
+        on_err!: |err| log .error!("db error: ${err .inspect()}"),
     }
 
-    db = Pg.connect!(db_config) ? |db_err| InitFailed("db connection failed: ${db_err.inspect()}")
+    db = Pg.connect!(db_config) ? |db_err| InitFailed("db connection failed: ${db_err .inspect()}")
 
     # TODO prepared statements need to happen here
 
@@ -63,11 +63,11 @@ init! = |_args| {
 
 required_env_var! : Str => Result(Str, [InitFailed(Str)])
 required_env_var! = |var_name| {
-    Env.var!(var_name).map_err(|VarNotFound| InitFailed("${var_name} env var was not set."))
+    Env.var!(var_name) .map_err(|VarNotFound| InitFailed("${var_name} env var was not set."))
 }
 
 write_log! : LogLevel, Str => {}
 write_log! = |level, msg| {
     # If writing to stderr fails when logging, ignore the error
-    ws.Stderr.line!("${level.to_str()}: ${msg}") ?? {}
+    ws.Stderr.line!("${level .to_str()}: ${msg}") ?? {}
 }

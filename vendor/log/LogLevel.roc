@@ -5,5 +5,5 @@ LogLevel := [Debug, Info, Warn, Error]
 
 from_str : Str -> Result(LogLevel, [UnsupportedLevel])
 from_str = |level_str| {
-    from_str_caseless(level_str).map_err(|InvalidTagStr| UnsupportedLevel)
+    from_str_caseless(level_str) .map_err(|InvalidTagStr| UnsupportedLevel)
 }

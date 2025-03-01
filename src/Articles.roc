@@ -31,9 +31,9 @@ insert! : Articles, UserId, NewArticle => Result(Article, [InternalErr(Str)])
 insert! = |{ client, prepared }, author_id, new_article| {
     # TODO https://realworld-docs.netlify.app/specifications/backend/endpoints/#create-article
     # TODO make insert_article.sql etc.
-    cmd = prepared.insert_article.bind(u64(author_id), ...)
+    cmd = prepared.insert_article .bind(u64(author_id), ...)
 
-    client.command!(cmd)
+    client .command!(cmd)
 }
 
 get_by_slug! : Articles, Str => Result(List(U8), [NotFound, InternalErr(Str)])
@@ -49,7 +49,7 @@ get_by_slug! = |{ client, prepared }, slug| {
                 updated_at: row.updated_at,
                 favorited: row.favorited,
                 favorites_count: row.favorites_count,
-                tag_list: row.comma_separated_tags.split(","),
+                tag_list: row.comma_separated_tags .split(","),
                 author: {
                     username: row.author_username,
                     bio: row.author_bio,
@@ -57,12 +57,12 @@ get_by_slug! = |{ client, prepared }, slug| {
                     following: row.author_following,
                 },
             })
-            .encode(Json.utf8.transform(CamelCase))
+            .encode(Json.utf8 .transform(CamelCase))
             .(Ok)
 
         Ok([]) -> Err(NotFound)
-        Ok([..]) -> Err(InternalErr("Multiple articles found for the slug ${slug.inspect()}"))
-        Err(db_err) -> Err(InternalErr(db_err.inspect()))
+        Ok([..]) -> Err(InternalErr("Multiple articles found for the slug ${slug .inspect()}"))
+        Err(db_err) -> Err(InternalErr(db_err .inspect()))
     }
 }
 
@@ -95,8 +95,8 @@ list! = |{ client, prepared }, opt_user_id, query_params| {
         Ok(rows) ->
             # JSON format: https://realworld-docs.netlify.app/specifications/backend/api-response-format/#multiple-articles
             {
-                articles_count: rows.len(),
-                articles: rows.map(|row| {
+                articles_count: rows .len(),
+                articles: rows .map(|row| {
                     slug: row.slug,
                     title: row.title,
                     description: row.description,
@@ -104,7 +104,7 @@ list! = |{ client, prepared }, opt_user_id, query_params| {
                     updated_at: row.updated_at,
                     favorited: row.favorited,
                     favorites_count: row.favorites_count,
-                    tags: row.comma_separated_tags.split(","),
+                    tags: row.comma_separated_tags .split(","),
                     author: {
                         username: row.author_username,
                         bio: row.author_bio,
@@ -113,15 +113,15 @@ list! = |{ client, prepared }, opt_user_id, query_params| {
                     },
                 }),
             }
-            .encode(Json.utf8.transform(CamelCase))
+            .encode(Json.utf8 .transform(CamelCase))
             .(Ok)
-        Err(db_err) -> Err(InternalErr(db_err.inspect()))
+        Err(db_err) -> Err(InternalErr(db_err .inspect()))
     }
 }
 
 update! : Articles, UserId, Str, UpdateArticle => Result(Article, [NotFound, Forbidden, InternalErr(Str)])
 update! = |{ client, prepared }, user_id, slug, update_article| {
-    cmd = prepared.update_article.bind(
+    cmd = prepared.update_article .bind(
         update_article.title,
         update_article.description,
         update_article.body,
@@ -129,40 +129,40 @@ update! = |{ client, prepared }, user_id, slug, update_article| {
         u64(user_id)
     )
 
-    match client.query!(cmd) {
+    match client .query!(cmd) {
         Ok([row]) -> Article.from_row(row).(Ok)
         Ok([]) -> Err(NotFound)
-        Err(db_err) -> Err(InternalErr(db_err.inspect()))
+        Err(db_err) -> Err(InternalErr(db_err .inspect()))
     }
 }
 
 delete! : Articles, UserId, Str => Result({}, [NotFound, Forbidden, InternalErr(Str)])
 delete! = |{ client, prepared }, user_id, slug| {
-    cmd = prepared.delete_article.bind(slug, u64(user_id))
+    cmd = prepared.delete_article .bind(slug, u64(user_id))
 
-    match client.execute!(cmd) {
+    match client .execute!(cmd) {
         Ok(0) -> Err(NotFound)
         Ok(_) -> Ok({})
-        Err(db_err) -> Err(InternalErr(db_err.inspect()))
+        Err(db_err) -> Err(InternalErr(db_err .inspect()))
     }
 }
 
 feed! : Articles, UserId, QueryParams => Result(List(U8), [InternalErr(Str)])
 feed! = |{ client, prepared }, user_id, query_params| {
-    limit = query_params.get("limit").map_ok(.to_u64()) ?? 20
-    offset = query_params.get("offset").map_ok(.to_u64()) ?? 0
-    cmd = prepared.get_feed.bind(u64(user_id), limit, offset)
+    limit = query_params .get("limit") .map_ok(.to_u64()) ?? 20
+    offset = query_params .get("offset") .map_ok(.to_u64()) ?? 0
+    cmd = prepared.get_feed .bind(u64(user_id), limit, offset)
 
-    match client.query!(cmd) {
+    match client .query!(cmd) {
         Ok(rows) ->
             {
-                articles_count: rows.len(),
-                articles: rows.map(Article.from_row),
+                articles_count: rows .len(),
+                articles: rows .map(Article.from_row),
             }
-            .encode(Json.utf8.transform(CamelCase))
+            .encode(Json.utf8 .transform(CamelCase))
             .(Ok)
         Err(db_err) ->
-            Err(InternalErr(db_err.inspect()))
+            Err(InternalErr(db_err .inspect()))
     }
 }
 
@@ -175,18 +175,18 @@ favorite! = |{ client, prepared }, user_id, slug| {
     # FROM articles a
     # JOIN users u ON a.author_id = u.id
     # WHERE a.slug = $2
-    cmd = prepared.favorite_article.bind(u64(user_id), slug)
+    cmd = prepared.favorite_article .bind(u64(user_id), slug)
 
-    match client.query!(cmd) {
+    match client .query!(cmd) {
         Ok([row]) -> Article.from_row(row).(Ok)
         Ok([]) -> Err(NotFound)
-        Err(db_err) -> Err(InternalErr(db_err.inspect()))
+        Err(db_err) -> Err(InternalErr(db_err .inspect()))
     }
 }
 
 unfavorite! : Articles, UserId, Str => Result(Article, [NotFound, InternalErr(Str)])
 unfavorite! = |{ client, prepared }, user_id, slug| {
-    cmd = prepared.unfavorite_article.bind(u64(user_id), slug)
+    cmd = prepared.unfavorite_article .bind(u64(user_id), slug)
 
     # TODO after unfavoriting, need to run this separate query to return the article. Code sharing seems reasonable here.
 
@@ -195,12 +195,12 @@ unfavorite! = |{ client, prepared }, user_id, slug| {
       # FROM articles a
       # JOIN users u ON a.author_id = u.id
       # WHERE a.slug = $2
-    match client.query!(cmd) {
+    match client .query!(cmd) {
         Ok([row]) ->
             Article.fromRow(row).(Ok)
         Ok([]) ->
             Err(NotFound)
         Err(db_err) ->
-            Err(InternalErr(db_err.inspect()))
+            Err(InternalErr(db_err .inspect()))
     }
 }

@@ -22,5 +22,5 @@ get_profile! = |username| {
     when find_by_username!(username) is
         Ok(user) => Ok(user)
         Err(NotFound) => Err(NotFound)
-        Err(db_err) => Err(InternalErr("DB error when trying to get the profile for user ${username.inspect()}. Error was: $(err.inspect())"))
+        Err(db_err) => Err(InternalErr("DB error when trying to get the profile for user ${username .inspect()}. Error was: $(err .inspect())"))
 }

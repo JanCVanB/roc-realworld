@@ -10,7 +10,7 @@ import Db
 ## Given a user's credentials, log them in and return their UserId.
 login! : Db, { email : Str, password : Str } => Result(UserId, [Unauthorized, InternalErr(Str)])
 login! = |db, { email, password }| {
-    match users.find_by_email!(email) {
+    match users .find_by_email!(email) {
         Ok(user) =>
             if user.password == password { # TODO decrypt, salt, etc.
                 Ok(user.user_id)
@@ -64,8 +64,8 @@ parse_user_id = |req, jwt_secret, now| {
 
 auth_header : UserId, JwtSecret, Instant -> (Str, Str)
 auth_header = |user_id, jwt_secret, now| {
-    claims = { sub: user_id.to_str(), std_claims: { expires_at: now + 12.(hours) } }
-	  token_str = Jwt.hs256_with_claims(claims).signed_str(jwt_secret)
+    claims = { sub: user_id .to_str(), std_claims: { expires_at: now + 12.(hours) } }
+	  token_str = Jwt.hs256_with_claims(claims) .signed_str(jwt_secret)
 
     # Auth header format: https://realworld-docs.netlify.app/specifications/backend/endpoints/
     ("Authorization", "Token ${token_str}")
@@ -73,7 +73,7 @@ auth_header = |user_id, jwt_secret, now| {
 
 ## Request headers can be created and then succsesfully parsed back out again
 expect {
-    now = time.Instant.from_ns_since_utc_epoch(123456789)
+    now = time.Instant .from_ns_since_utc_epoch(123456789)
     user_id = UserId.from_str(123)
     jwt_secret = JwtSecret.from_str("abcdefg")
     expired_time = now + 1.(hour)
@@ -85,7 +85,7 @@ expect {
 
 ## When we get a JWT that has expired, we give an error.
 expect {
-    now = time.Instant.from_ns_since_utc_epoch(123456789)
+    now = time.Instant .from_ns_since_utc_epoch(123456789)
     user_id = UserId.from_str(123)
     jwt_secret = JwtSecret.from_str("abcdefg")
     expired_time = now - 1.(hour)
@@ -97,7 +97,7 @@ expect {
 
 ## When we get a request that has no JWT header in it, we get an error.
 expect {
-    now = time.Instant.from_ns_since_utc_epoch(123456789)
+    now = time.Instant .from_ns_since_utc_epoch(123456789)
     jwt_secret = JwtSecret.from_str("abcdefg")
     request = Request.new({ method: "GET", path: "/", headers: [] })
 
@@ -106,7 +106,7 @@ expect {
 
 ## When we get a malformed JWT, we get a parse error.
 expect {
-    now = time.Instant.from_ns_since_utc_epoch(123456789)
+    now = time.Instant .from_ns_since_utc_epoch(123456789)
     jwt_secret = JwtSecret.from_str("abcdefg")
     malformed_jwt = "not.a.valid.jwt"
     headers = [("Authorization", "Token ${malformed_jwt}")]
